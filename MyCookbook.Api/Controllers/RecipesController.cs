@@ -4,7 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using MyCookbook.Api.Models;
+using MyCookbook.Data.Core.Models;
+using MyCookbook.Data.Core.Repositories;
 
 namespace MyCookbook.Api.Controllers
 {
@@ -12,33 +13,62 @@ namespace MyCookbook.Api.Controllers
     [ApiController]
     public class RecipesController : ControllerBase
     {
+        private readonly IRecipeRepository recipeRepository;
+        public RecipesController(IRecipeRepository recipeRepository)
+        {
+            this.recipeRepository = recipeRepository;
+        }
 
+        /// <summary>
+        /// Get All saved recipes for the logged in user
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<IEnumerable<Recipe>> Get()
         {
             var email = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "email").Value;
-            return new[] { "test1", "test2" };
+
+            return await recipeRepository.GetAllAsync(r => r.UserEmail == email);
         }
 
+        /// <summary>
+        /// Save a recipe for the logged in user
+        /// </summary>
+        /// <param name="recipe">The Recipe to Save</param>
+        /// <returns></returns>
         [HttpPut]
-        public IEnumerable<string> Put(Recipe recipe)
+        public async Task<Recipe> Put(Recipe recipe)
         {
             var email = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "email").Value;
-            return new[] { "test1", "test2" };
+            recipe.UserEmail = email;
+            await recipeRepository.AddAsync(recipe);
+            return recipe;
         }
 
+        /// <summary>
+        /// Update a Recipe for a logged in user
+        /// </summary>
+        /// <param name="recipe">The Recipe to update</param>
+        /// <returns></returns>
         [HttpPost]
-        public IEnumerable<string> Post(Recipe recipe)
+        public async Task<Recipe> Post(string url, Recipe recipe)
         {
             var email = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "email").Value;
-            return new[] { "test1", "test2" };
+            recipe.UserEmail = email;
+            await recipeRepository.UpdateRecipeByUrl(url, recipe);
+            return recipe;
         }
 
+        /// <summary>
+        /// Remove a recipe matching the url for the logged in user
+        /// </summary>
+        /// <param name="url">The url of the recipe to delete</param>
+        /// <returns></returns>
         [HttpDelete]
-        public IEnumerable<string> Delete(string url)
+        public async Task Delete(string url)
         {
             var email = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "email").Value;
-            return new[] { "test1", "test2" };
+            await recipeRepository.DeleteByUrlAndEmail(url, email);
         }
     }
 }

@@ -9,10 +9,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using MyCookbook.Data.Contexts;
+using MyCookbook.Data.Core.Repositories;
+using MyCookbook.Data.Repositories;
 
 namespace MyCookbook.Api
 {
@@ -28,6 +32,9 @@ namespace MyCookbook.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<RecipeContext>(opts => opts.UseSqlServer(Configuration["ConnectionString:MyCookbookDB"]));
+            services.AddScoped<IRecipeRepository, RecipeRepository>();
+
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowVueClient", policy =>
@@ -50,6 +57,16 @@ namespace MyCookbook.Api
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            //ensure DB is created and up to date
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                using (var context = serviceScope.ServiceProvider.GetService<RecipeContext>())
+                {
+                    context.Database.Migrate();
+                }
+            }
+
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
