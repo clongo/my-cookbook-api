@@ -18,6 +18,7 @@ namespace MyCookbook.Data.Repositories
         {
         }
 
+        /// <inheritdoc/>
         public async Task<IEnumerable<Recipe>> SearchRecipes(string userEmail, string searchTerms)
         {
             //construct search logic
@@ -61,17 +62,19 @@ namespace MyCookbook.Data.Repositories
             return results;
         }
 
+        /// <inheritdoc/>
         public async Task<Recipe> GetByUrlAndEmail(string recipeUrl, string userEmail)
         {
             return await RecipeContext.Recipes.FirstOrDefaultAsync(r => r.UserEmail == userEmail && r.Url == recipeUrl);
         }
 
+        /// <inheritdoc/>
         public async Task UpdateRecipeByUrl(string url, Recipe recipe)
         {
             var dbRecipe = await GetByUrlAndEmail(url, recipe.UserEmail);
 
             //update values
-            dbRecipe.Url = recipe.Url;
+            dbRecipe.Url = recipe.Url; //update the url incase of protocol difference in Google search
             dbRecipe.Description = recipe.Description;
             dbRecipe.Image = recipe.Image;
             dbRecipe.Name = recipe.Name;
@@ -83,6 +86,7 @@ namespace MyCookbook.Data.Repositories
             await UpdateAsync(dbRecipe);
         }
 
+        /// <inheritdoc/>
         public async Task DeleteByUrlAndEmail(string recipeUrl, string userEmail)
         {
             var recipe = await GetByUrlAndEmail(recipeUrl, userEmail);

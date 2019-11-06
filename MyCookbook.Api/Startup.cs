@@ -42,9 +42,11 @@ namespace MyCookbook.Api
                     policy.WithOrigins("http://localhost:8080").AllowAnyHeader().AllowAnyMethod();
                 });
             });
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options => {
                 options.UseGoogle("677206663963-5i6kf5v2s8f2i3tlle9r0hq0sppnuprf.apps.googleusercontent.com");
             });
+
             services.AddControllers(config =>
             {
                 var policy = new AuthorizationPolicyBuilder()
