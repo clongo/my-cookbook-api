@@ -9,6 +9,7 @@ namespace MyCookbook.Data.Core.Repositories
     public interface IRecipeRepository : IRepositoryBase<Recipe>
     {
         Task<Recipe> GetByUrlAndEmail(string recipeUrl, string userEmail);
+        Task<IEnumerable<Recipe>> SearchRecipes(string userEmail, string searchTerms);
         Task UpdateRecipeByUrl(string url, Recipe recipe);
         Task DeleteByUrlAndEmail(string recipeUrl, string userEmail);
     }

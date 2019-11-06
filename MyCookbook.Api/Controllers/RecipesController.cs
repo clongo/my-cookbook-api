@@ -32,6 +32,18 @@ namespace MyCookbook.Api.Controllers
         }
 
         /// <summary>
+        /// Get saved recipes for the logged in user that match searchTerm
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet("Search")]
+        public async Task<IEnumerable<Recipe>> Search(string searchTerms)
+        {
+            var email = HttpContext.User.Claims.SingleOrDefault(c => c.Type == "email").Value;
+
+            return await recipeRepository.SearchRecipes(email, searchTerms);
+        }
+
+        /// <summary>
         /// Save a recipe for the logged in user
         /// </summary>
         /// <param name="recipe">The Recipe to Save</param>
